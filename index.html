@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>RED AI</title>
+<style>
+:root{--bg:#0a0508;--card:#1a0d11;--line:#2e1a20;--red:#ff3347;--red2:#c0001a;--txt:#f4eaec;--mut:#9a8388}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:var(--bg);color:var(--txt);font-family:system-ui,-apple-system,Roboto,Arial,sans-serif}
+body{display:flex;flex-direction:column;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)}
+header{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--line)}
+header img{width:40px;height:40px;border-radius:10px}
+header b{font-size:18px;letter-spacing:1px;flex:1}
+header b span{color:var(--red)}
+.ib{background:var(--card);border:1px solid var(--line);color:var(--txt);border-radius:10px;padding:8px 11px;font-size:15px}
+#chat{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px}
+.empty{margin:auto;text-align:center;color:var(--mut)}
+.empty img{width:200px;height:200px;border-radius:44px;margin-bottom:14px}
+.empty h2{color:var(--txt);margin-bottom:6px}
+.m{max-width:88%;padding:10px 13px;border-radius:16px;line-height:1.5;font-size:15px;word-wrap:break-word;overflow-wrap:anywhere}
+.u{align-self:flex-end;background:linear-gradient(135deg,var(--red),var(--red2));border-bottom-right-radius:4px;white-space:pre-wrap}
+.a{align-self:flex-start;background:var(--card);border:1px solid var(--line);border-bottom-left-radius:4px}
+.a pre{background:#000;border-radius:10px;padding:10px;margin:8px 0;overflow-x:auto;font-size:13px}
+.a code{background:#000;padding:1px 5px;border-radius:5px;font-size:13px}
+.a pre code{padding:0;background:none}
+.err{border-color:var(--red);color:#ff9aa4}
+.im{max-width:100%;border-radius:12px;display:block}
+.dl{display:inline-block;margin-top:8px;color:var(--red);font-size:14px;text-decoration:none}
+.ib.act{border-color:var(--red);background:#3a0f16}
+.dots{display:inline-flex;gap:4px}
+.dots i{width:7px;height:7px;border-radius:50%;background:var(--red);animation:b 1s infinite}
+.dots i:nth-child(2){animation-delay:.15s}.dots i:nth-child(3){animation-delay:.3s}
+@keyframes b{0%,80%,100%{opacity:.25}40%{opacity:1}}
+footer{display:flex;gap:8px;padding:10px 12px;border-top:1px solid var(--line);align-items:flex-end}
+textarea{flex:1;background:var(--card);border:1px solid var(--line);color:var(--txt);border-radius:16px;padding:11px 14px;font-size:15px;resize:none;max-height:140px;font-family:inherit;outline:none}
+textarea:focus{border-color:var(--red)}
+#send{background:linear-gradient(135deg,var(--red),var(--red2));border:0;color:#fff;width:44px;height:44px;border-radius:50%;font-size:20px}
+#send:disabled{opacity:.5}
+.ov{position:fixed;inset:0;background:#000b;display:none;align-items:flex-end;z-index:9}
+.ov.on{display:flex}
+.sh{background:var(--card);width:100%;max-height:85%;overflow-y:auto;border-radius:20px 20px 0 0;padding:18px;padding-bottom:calc(18px + env(safe-area-inset-bottom))}
+.sh h3{margin-bottom:12px}
+.sh label{display:block;font-size:13px;color:var(--mut);margin:12px 0 5px}
+.sh input,.sh textarea{width:100%;border-radius:12px;background:var(--bg);color:var(--txt);border:1px solid var(--line);padding:11px 14px;font-size:15px;font-family:inherit;outline:none}
+.row{display:flex;gap:8px;margin-top:16px}
+.row button{flex:1;padding:12px;border-radius:12px;border:1px solid var(--line);background:var(--bg);color:var(--txt);font-size:15px}
+.row .p{background:linear-gradient(135deg,var(--red),var(--red2));border:0}
+.ch{padding:12px;border:1px solid var(--line);border-radius:12px;margin-bottom:8px;display:flex;justify-content:space-between;gap:8px}
+.ch span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+</style>
+</head>
+<body>
+<header>
+  <img id="lg" alt="RED AI">
+  <b>RED <span>AI</span></b>
+  <button class="ib" id="bH">☰</button>
+  <button class="ib" id="bN">＋</button>
+  <button class="ib" id="bS">⚙</button>
+</header>
+<div id="chat"></div>
+<footer>
+  <button class="ib" id="bI" style="height:44px">🎨</button>
+  <textarea id="inp" rows="1" placeholder="Xabar yozing..."></textarea>
+  <button id="send">➤</button>
+</footer>
+
+<div class="ov" id="oS"><div class="sh">
+  <h3>⚙ Sozlamalar</h3>
+  <label>API kalit (Google Gemini)</label>
+  <input id="fK" type="password" placeholder="AIza...">
+  <label>Model</label>
+  <input id="fM" placeholder="gemini-flash-lite-latest">
+  <label>Rasm modeli</label>
+  <input id="fI" placeholder="gemini-3.1-flash-image">
+  <label>Tizim ko'rsatmasi (system prompt)</label>
+  <textarea id="fP" rows="4"></textarea>
+  <div class="row"><button id="sC">Yopish</button><button class="p" id="sS">Saqlash</button></div>
+</div></div>
+
+<div class="ov" id="oH"><div class="sh">
+  <h3>🕘 Suhbatlar</h3>
+  <div id="hl"></div>
+  <div class="row"><button id="hC">Yopish</button><button id="hD">Hammasini o'chirish</button></div>
+</div></div>
+
+<script>
+// ===== LOGO (kod ichiga joylangan) =====
+const LOGO_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024"><defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1a0a0d"/><stop offset="1" stop-color="#0a0508"/></linearGradient><linearGradient id="red" gradientUnits="userSpaceOnUse" x1="284" y1="150" x2="740" y2="874"><stop offset="0" stop-color="#ff4d5a"/><stop offset="1" stop-color="#c0001a"/></linearGradient><radialGradient id="g" cx=".5" cy=".5" r=".6"><stop offset="0" stop-color="#ff1f3d" stop-opacity=".45"/><stop offset="1" stop-color="#ff1f3d" stop-opacity="0"/></radialGradient></defs><rect width="1024" height="1024" rx="230" fill="url(#bg)"/><circle cx="512" cy="512" r="400" fill="url(#g)"/><polygon points="512,150 740,281 740,743 512,874 284,743 284,281" fill="none" stroke="url(#red)" stroke-width="26" stroke-linejoin="round"/><g stroke="url(#red)" stroke-width="24" stroke-linecap="round" stroke-linejoin="round" fill="none"><path d="M425 330V690"/><path d="M425 330H535Q620 330 620 410Q620 490 535 490H425"/><path d="M535 490L630 690"/></g><g fill="#fff"><circle cx="425" cy="330" r="22"/><circle cx="425" cy="690" r="22"/><circle cx="620" cy="410" r="22"/><circle cx="425" cy="490" r="22"/><circle cx="630" cy="690" r="22"/></g></svg>`;
+const LOGO = 'data:image/svg+xml;utf8,' + encodeURIComponent(LOGO_SVG);
+const BANNER_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024"><defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1a0a0d"/><stop offset="1" stop-color="#0a0508"/></linearGradient><linearGradient id="red" gradientUnits="userSpaceOnUse" x1="290" y1="170" x2="730" y2="663"><stop offset="0" stop-color="#ff4d5a"/><stop offset="1" stop-color="#c0001a"/></linearGradient><radialGradient id="glow" cx="0.5" cy="0.4" r="0.6"><stop offset="0" stop-color="#ff1f3d" stop-opacity="0.45"/><stop offset="1" stop-color="#ff1f3d" stop-opacity="0"/></radialGradient></defs><rect width="1024" height="1024" rx="230" fill="url(#bg)"/><circle cx="512" cy="420" r="380" fill="url(#glow)"/><polygon points="512,170 726,293 726,540 512,663 298,540 298,293" fill="none" stroke="url(#red)" stroke-width="22" stroke-linejoin="round"/><g stroke="url(#red)" stroke-width="20" stroke-linecap="round" stroke-linejoin="round" fill="none"><path d="M430 270 V500"/><path d="M430 270 H520 Q590 270 590 335 Q590 400 520 400 H430"/><path d="M520 400 L600 500"/></g><g fill="#fff"><circle cx="430" cy="270" r="18"/><circle cx="430" cy="500" r="18"/><circle cx="590" cy="335" r="18"/><circle cx="430" cy="400" r="18"/><circle cx="600" cy="500" r="18"/></g><text x="512" y="850" text-anchor="middle" font-family="Arial Black, Helvetica, Arial, sans-serif" font-size="150" font-weight="900" letter-spacing="10" fill="#ffffff">RED <tspan fill="#ff3347">AI</tspan></text></svg>`;
+const BANNER = 'data:image/svg+xml;utf8,' + encodeURIComponent(BANNER_SVG);
+document.getElementById('lg').src = BANNER;
+
+// ===== Holat =====
+const $ = id => document.getElementById(id);
+const ld = (k, d) => { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } };
+const sv = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} };
+let cfg = ld('red_cfg', { key: '', model: 'gemini-flash-lite-latest', sys: "Sening isming RED AI. Foydalanuvchi qaysi tilda yozsa, shu tilda (asosan o'zbekcha) aniq, do'stona va foydali javob ber." });
+if (!cfg.imgModel) cfg.imgModel = 'gemini-3.1-flash-image';
+const DEFAULT_KEY = '';
+if (!cfg.key) cfg.key = DEFAULT_KEY;
+if (['gemini-3.7-flash','gemini-3.5-flash-lite'].includes(cfg.model)) { cfg.model = 'gemini-flash-lite-latest'; sv('red_cfg', cfg); }
+let chats = ld('red_chats', []);
+let cur = null, busy = false;
+
+function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function md(t){
+  let h = esc(t);
+  h = h.replace(/```(\w*)\n?([\s\S]*?)```/g, (_, l, c) => '<pre><code>' + c + '</code></pre>');
+  h = h.replace(/`([^`\n]+)`/g, '<code>$1</code>');
+  h = h.replace(/\*\*([^*\n]+)\*\*/g, '<b>$1</b>');
+  return h.replace(/\n/g, '<br>').replace(/<pre><code>([\s\S]*?)<\/code><\/pre>/g, (m) => m.replace(/<br>/g, '\n'));
+}
+function save(){ sv('red_chats', chats.map(c => ({ id: c.id, title: c.title, msgs: c.msgs.map(m => ({ role: m.role, content: m.content })) }))); }
+let imgMode = false;
+function addImg(src, cap){
+  const d = document.createElement('div'); d.className = 'm a';
+  d.innerHTML = '<img class="im" src="' + src + '"><a class="dl" download="red-ai.png" href="' + src + '">⬇ Yuklab olish</a>' + (cap ? '<div style="margin-top:6px">' + md(cap) + '</div>' : '');
+  $('chat').appendChild(d); $('chat').scrollTop = $('chat').scrollHeight;
+}
+function newChat(){ cur = { id: Date.now(), title: 'Yangi suhbat', msgs: [] }; chats.unshift(cur); render(); }
+function render(){
+  const c = $('chat'); c.innerHTML = '';
+  if (!cur || !cur.msgs.length) {
+    c.innerHTML = `<div class="empty"><img src="${BANNER}"><h2>RED AI</h2><div>Savolingizni yozing</div></div>`;
+    return;
+  }
+  cur.msgs.forEach(m => m.img ? addImg(m.img) : add(m.role, m.content));
+  c.scrollTop = c.scrollHeight;
+}
+function add(role, text, err){
+  const d = document.createElement('div');
+  d.className = 'm ' + (role === 'user' ? 'u' : 'a') + (err ? ' err' : '');
+  if (role === 'user') d.textContent = text; else d.innerHTML = md(text);
+  $('chat').appendChild(d); $('chat').scrollTop = $('chat').scrollHeight;
+  return d;
+}
+
+const BACKEND_URL = ''; // Railway server manzili, masalan: https://red-ai-server.up.railway.app
+function callText(contents){
+  if (BACKEND_URL) return fetch(BACKEND_URL + '/chat', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ system: cfg.sys, contents }) });
+  return fetch('https://generativelanguage.googleapis.com/v1beta/models/' + encodeURIComponent(cfg.model) + ':streamGenerateContent?alt=sse', {
+    method: 'POST', headers: { 'content-type': 'application/json', 'x-goog-api-key': cfg.key },
+    body: JSON.stringify({ systemInstruction: { parts: [{ text: cfg.sys }] }, contents, generationConfig: { maxOutputTokens: 2048 } })
+  });
+}
+function callImage(prompt){
+  if (BACKEND_URL) return fetch(BACKEND_URL + '/image', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ prompt }) });
+  return fetch('https://generativelanguage.googleapis.com/v1beta/models/' + encodeURIComponent(cfg.imgModel) + ':generateContent', {
+    method: 'POST', headers: { 'content-type': 'application/json', 'x-goog-api-key': cfg.key },
+    body: JSON.stringify({ contents: [{ role: 'user', parts: [{ text: prompt }] }], generationConfig: { responseModalities: ['TEXT', 'IMAGE'] } })
+  });
+}
+async function send(){
+  const t = $('inp').value.trim();
+  if (!t || busy) return;
+  if (!cfg.key && !BACKEND_URL) { $('oS').classList.add('on'); fill(); return; }
+  if (!cur) newChat();
+  busy = true; $('send').disabled = true;
+  if (!cur.msgs.length) { $('chat').innerHTML = ''; cur.title = t.slice(0, 40); }
+  cur.msgs.push({ role: 'user', content: t });
+  add('user', t); $('inp').value = ''; $('inp').style.height = 'auto';
+  const w = document.createElement('div');
+  w.className = 'm a'; w.innerHTML = '<span class="dots"><i></i><i></i><i></i></span>';
+  $('chat').appendChild(w); $('chat').scrollTop = $('chat').scrollHeight;
+  try {
+    if (imgMode) {
+      const r0 = await callImage(t);
+      const j0 = await r0.json();
+      if (!r0.ok) throw new Error((j0.error && j0.error.message) || ('Xato ' + r0.status));
+      const ps0 = (j0.candidates && j0.candidates[0] && j0.candidates[0].content && j0.candidates[0].content.parts) || [];
+      const im = ps0.find(x => x.inlineData || x.inline_data);
+      const txt = ps0.filter(x => x.text && !x.thought).map(x => x.text).join('\n');
+      if (!im) throw new Error(txt || "Rasm yaratilmadi. Boshqacha tasvirlab ko'ring.");
+      const dd = im.inlineData || im.inline_data;
+      const src = 'data:' + (dd.mimeType || dd.mime_type || 'image/png') + ';base64,' + dd.data;
+      cur.msgs.push({ role: 'assistant', content: '🖼 Rasm yaratildi: ' + t.slice(0, 60), img: src });
+      w.remove(); addImg(src, txt);
+      save(); busy = false; $('send').disabled = false;
+      return;
+    }
+    const r = await callText(cur.msgs.slice(-30).map(m => ({ role: m.role === 'user' ? 'user' : 'model', parts: [{ text: m.content }] })));
+    if (!r.ok) {
+      let m = 'Xato ' + r.status;
+      try { const e = await r.json(); if (e.error && e.error.message) m = e.error.message; } catch (x) {}
+      throw new Error(m);
+    }
+    const rd = r.body.getReader(), dec = new TextDecoder();
+    let buf = '', a = '';
+    while (true) {
+      const { done, value } = await rd.read();
+      if (done) break;
+      buf += dec.decode(value, { stream: true });
+      const lines = buf.split('\n'); buf = lines.pop();
+      for (const ln of lines) {
+        if (!ln.startsWith('data:')) continue;
+        try {
+          const j = JSON.parse(ln.slice(5).trim());
+          const ps = (j.candidates && j.candidates[0] && j.candidates[0].content && j.candidates[0].content.parts) || [];
+          const t = ps.filter(x => x.text && !x.thought).map(x => x.text).join('');
+          if (t) { a += t; w.innerHTML = md(a); $('chat').scrollTop = $('chat').scrollHeight; }
+        } catch (x) {}
+      }
+    }
+    if (!a) a = "Javob bo'sh keldi.";
+    w.innerHTML = md(a);
+    cur.msgs.push({ role: 'assistant', content: a });
+    w.innerHTML = md(a);
+  } catch (e) {
+    cur.msgs.pop();
+    w.className = 'm a err'; w.textContent = '⚠ ' + e.message;
+    $('inp').value = t;
+  }
+  save(); busy = false; $('send').disabled = false;
+  $('chat').scrollTop = $('chat').scrollHeight;
+}
+
+function fill(){ $('fI').value = cfg.imgModel; $('fK').value = cfg.key; $('fM').value = cfg.model; $('fP').value = cfg.sys; }
+function hist(){
+  const l = $('hl'); l.innerHTML = '';
+  if (!chats.length) l.innerHTML = '<div style="color:var(--mut)">Hozircha bo\'sh</div>';
+  chats.forEach(c => {
+    const d = document.createElement('div'); d.className = 'ch';
+    d.innerHTML = '<span></span><b style="color:var(--red)">✕</b>';
+    d.firstChild.textContent = c.title;
+    d.firstChild.onclick = () => { cur = c; render(); $('oH').classList.remove('on'); };
+    d.lastChild.onclick = () => { chats = chats.filter(x => x !== c); if (cur === c) cur = null; save(); render(); hist(); };
+    l.appendChild(d);
+  });
+}
+
+$('send').onclick = send;
+$('inp').addEventListener('input', e => { e.target.style.height = 'auto'; e.target.style.height = e.target.scrollHeight + 'px'; });
+$('bN').onclick = newChat;
+$('bI').onclick = () => { imgMode = !imgMode; $('bI').classList.toggle('act', imgMode); $('inp').placeholder = imgMode ? 'Qanday rasm kerak? (rasm rejimi)' : 'Xabar yozing...'; };
+$('bS').onclick = () => { fill(); $('oS').classList.add('on'); };
+$('sC').onclick = () => $('oS').classList.remove('on');
+$('sS').onclick = () => {
+  cfg = { key: $('fK').value.trim(), model: $('fM').value.trim() || 'gemini-flash-lite-latest', imgModel: $('fI').value.trim() || 'gemini-3.1-flash-image', sys: $('fP').value.trim() };
+  sv('red_cfg', cfg); $('oS').classList.remove('on');
+};
+$('bH').onclick = () => { hist(); $('oH').classList.add('on'); };
+$('hC').onclick = () => $('oH').classList.remove('on');
+$('hD').onclick = () => { chats = []; cur = null; save(); render(); hist(); };
+
+if (BACKEND_URL) ['fK', 'fM', 'fI'].forEach(id => { const e = $(id); e.style.display = 'none'; e.previousElementSibling.style.display = 'none'; });
+if (chats.length) cur = chats[0];
+render();
+</script>
+</body>
+</html>
